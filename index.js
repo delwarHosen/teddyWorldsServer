@@ -77,6 +77,44 @@ async function run() {
             const result = await productCollection.find().toArray()
             res.send(result)
         })
+
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await productCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.post('/products', verifyToken, verifyAdmin, async (req, res) => {
+            const query = req.body;
+            const result = await productCollection.insertOne(query);
+            res.send(result)
+        })
+
+        app.delete('/products/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await productCollection.deleteOne(query)
+            res.send(result)
+        })
+
+        app.patch('/products/:id', async (req, res) => {
+            const product = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    name: product.name,
+                    category: product.category,
+                    price: product.price,
+                    details: product.details,
+                    image: product.image
+                }
+            }
+            const result = await productCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
         // review collection
         app.get('/reviews', async (req, res) => {
             const result = await reviewCollection.find().toArray()
@@ -131,7 +169,6 @@ async function run() {
             const result = await userCollection.updateOne(filter, updatedDoc)
             res.send(result)
         })
-
 
         app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id
